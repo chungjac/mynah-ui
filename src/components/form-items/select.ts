@@ -36,7 +36,6 @@ export interface SelectProps {
   wrapperTestId?: string;
   optionTestId?: string;
   tooltip?: string;
-  showDescriptionAsTooltip?: boolean;
 }
 
 export abstract class SelectAbstract {
@@ -98,8 +97,8 @@ export class SelectInternal {
             ]
           };
 
-          // Add disabled description option if description exists and not using tooltip
-          if (props.showDescriptionAsTooltip !== true && option.description != null && option.description.trim() !== '') {
+          // Add disabled description option if description exists
+          if (option.description != null && option.description.trim() !== '') {
             return [
               mainOption,
               {
@@ -150,18 +149,13 @@ export class SelectInternal {
       ]
     });
 
-    // Add tooltip functionality
-    this.setupTooltip();
-  }
-
-  private readonly setupTooltip = (): void => {
-    if (this.props.showDescriptionAsTooltip === true) {
+    // Add tooltip functionality if tooltip is provided
+    if (props.tooltip != null && props.tooltip.trim() !== '') {
       this.selectContainer.update({
         events: {
           mouseenter: () => {
-            const currentTooltip = this.getCurrentTooltip();
-            if (currentTooltip != null && currentTooltip.trim() !== '') {
-              this.showTooltip(currentTooltip);
+            if (props.tooltip != null && props.tooltip.trim() !== '') {
+              this.showTooltip(props.tooltip);
             }
           },
           mouseleave: () => {
@@ -170,18 +164,7 @@ export class SelectInternal {
         }
       });
     }
-  };
-
-  private readonly getCurrentTooltip = (): string => {
-    const currentValue = this.selectElement.value;
-    const selectedOption = this.props.options?.find(option => option.value === currentValue);
-
-    // Show label and description for tooltip mode; otherwise use base tooltip
-    if (this.props.showDescriptionAsTooltip === true && selectedOption?.description != null) {
-      return `<strong>${selectedOption.label}</strong><br>${selectedOption.description}`;
-    }
-    return this.props.tooltip ?? '';
-  };
+  }
 
   setValue = (value: string): void => {
     this.selectElement.value = value;
